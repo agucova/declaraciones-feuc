@@ -97,6 +97,13 @@ def declaraciones():
     )
 
 
+@app.route("/representantes")
+def representantes():
+    return render_template(
+        "representantes.html", is_authenticated=current_user.is_authenticated
+    )
+
+
 @app.route("/admin")
 @login_required
 def admin():
