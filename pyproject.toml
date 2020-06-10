@@ -8,6 +8,7 @@ authors = ["Agustín Covarrubias <agucova@uc.cl>"]
 python = "^3.8"
 flask_sqlalchemy = "^2.4.3"
 python-dotenv = "^0.13.0"
+pytest-cov = "^2.9.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
