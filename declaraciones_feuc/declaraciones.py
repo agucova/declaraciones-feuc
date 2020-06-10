@@ -43,7 +43,7 @@ def load_person(id):
 @app.before_request
 def before_request():
     db.connect()
-    db.create_tables([Person, Statement])
+    db.create_tables([Person, Statement])  # Performance hog, please remove
 
 
 @app.after_request

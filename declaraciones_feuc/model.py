@@ -67,6 +67,3 @@ class Statement(Model):
 
     class Meta:
         database = db
-
-
-db.create_tables([Person, Statement])

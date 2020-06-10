@@ -1,0 +1,1 @@
+web: gunicorn declaraciones_feuc.declaraciones:app
