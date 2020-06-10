@@ -1,0 +1,47 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Configurar Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Instalar Poetry
+        uses: dschep/install-poetry-action@v1.2
+
+      - name: Hacer cache de Poetry
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: ~/.virtualenvs
+          key: poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Configurar Poetry
+        run: |
+          poetry config settings.virtualenvs.in-project false
+          poetry config settings.virtualenvs.path ~/.virtualenvs
+
+      - name: Instalar dependencias
+        run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Formato del Código
+        run: poetry run black . --check
+
+      - name: Tests
+        env:
+          DJANGO_SETTINGS_MODULE: project.settings
+          SECRETS_FILE: .confidential/ci.json
+        run: poetry run pytest --cov . -n 2
