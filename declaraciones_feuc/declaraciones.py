@@ -6,6 +6,7 @@ import os
 
 # create and configure the app
 app = Flask(__name__, instance_relative_config=True)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///declaraciones.sqlite3"
 db = SQLAlchemy(app)
 
