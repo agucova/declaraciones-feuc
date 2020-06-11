@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Miembros
+{% endblock %}
+
+{% block main %}
+<h1>Miembros</h1><br>
+<ul class="list-group">
+    {% for member in org.members %}
+    <li class="list-group-item">
+        {{member.name}}
+        {% if member.admin_of %}
+        <b>(admin)</b>
+        {% else %}
+        <b>(miembro)</b>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul><br>
+
+<h2>Modificar Miembro</h2><br>
+<form>
+    <div class="form-group">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Usuario" aria-label="Usuario"
+                aria-describedby="basic-addon2" id="usuario" name="usuario">
+            <div class="input-group-append">
+                <span class="input-group-text" id="basic-addon2">@uc.cl</span>
+            </div>
+        </div>
+        <button type="submit" method="get" action="/ajustes" class="btn btn-primary" value="1"
+            name="añadir">Añadir</button>
+        <button name="remover" type="submit" method="get" action="/ajustes" class="btn btn-primary"
+            value="1">Remover</button>
+    </div>
+</form>
+<br><br>
+
+{% endblock %}

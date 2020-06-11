@@ -15,13 +15,18 @@ Mi Organización
         tabindex="-1" aria-disabled="true">
         Acrónimo
         <span>{{ org.acronym }}</span></li>
-    <a href="members" class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
+    <a href="/miembros"
+        class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
         Miembros
         <span class="badge badge-primary badge-pill">{{ org.members|length }}</span>
     </a>
-    <a href="/admins" class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
+    <a href="/miembros"
+        class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
         Administradores
         <span class="badge badge-primary badge-pill ">{{ org.admins|length }}</span>
+    </a>
+    <a href="/ajustes" class="list-group-item list-group-item-action list-group-item-primary">
+        Ajustes
     </a>
 </ul>
 {% endblock %}

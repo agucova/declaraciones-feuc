@@ -1,3 +1,9 @@
+import os
+
+
+from declaraciones_feuc.model import db, Person, Statement, Organization
+from declaraciones_feuc.auth import get_user_info, get_redirect_url
+from oauthlib.oauth2 import WebApplicationClient
 from flask import Flask
 from flask import render_template, redirect, request, url_for
 
@@ -8,14 +14,6 @@ from flask_login import (
     login_user,
     logout_user,
 )
-
-from oauthlib.oauth2 import WebApplicationClient
-import os
-import requests
-import json
-
-from declaraciones_feuc.model import db, Person, Statement, Organization
-from declaraciones_feuc.auth import get_user_info, get_redirect_url
 
 # Initialize app
 app = Flask(__name__)
@@ -52,29 +50,20 @@ def before_request():
         current_user.is_representative = False
 
 
-@app.after_request
-def after_request(response):
-    db.close()
-    return response
-
-
-# disable cache
+# disable cache and close db
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
+    db.close()
     return response
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return (
-        render_template(
-            "404.html",
-            is_authenticated=current_user.is_authenticated,
-            is_representative=current_user.is_representative,
-        ),
+        render_template("404.html", user=current_user,),
         404,
     )
 
@@ -82,11 +71,7 @@ def page_not_found(e):
 @app.errorhandler(403)
 def page_forbidden(e):
     return (
-        render_template(
-            "403.html",
-            is_authenticated=current_user.is_authenticated,
-            is_representative=current_user.is_representative,
-        ),
+        render_template("403.html", user=current_user,),
         403,
     )
 
@@ -94,70 +79,33 @@ def page_forbidden(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return (
-        render_template(
-            "500.html",
-            is_authenticated=current_user.is_authenticated,
-            is_representative=current_user.is_representative,
-        ),
+        render_template("500.html", user=current_user,),
         500,
     )
 
 
 @app.route("/")
 def home():
-    return render_template(
-        "home.html",
-        is_authenticated=current_user.is_authenticated,
-        is_representative=current_user.is_representative,
-    )
+    return render_template("home.html", user=current_user,)
 
 
 @app.route("/declaraciones")
 def declaraciones():
-    return render_template(
-        "declaraciones.html",
-        is_authenticated=current_user.is_authenticated,
-        is_representative=current_user.is_representative,
-    )
+    return render_template("statements.html", user=current_user,)
 
 
 @app.route("/representantes")
 def representantes():
-    return render_template(
-        "representantes.html",
-        is_authenticated=current_user.is_authenticated,
-        is_representative=current_user.is_representative,
-    )
+    return render_template("representatives.html", user=current_user,)
 
 
-@app.route("/upload")
+@app.route("/crear")
 @login_required
 def upload():
     if current_user.is_representative:
-        return render_template(
-            "upload.html",
-            is_authenticated=current_user.is_authenticated,
-            is_representative=current_user.is_representative,
-            use=["upload"],
-        )
+        return render_template("upload.html", user=current_user, use=["upload"],)
     else:
         return page_forbidden(403)
-
-
-@app.route("/login")  # TODO: #7 Refactor all authentication logic to a separate file
-def login():
-    return redirect(
-        get_redirect_url(client=client, request=request, discovery=GOOGLE_DISCOVERY_URL)
-    )
-
-
-# Here comes the auth
-# TODO: #4 Fix unstable auth session
-
-
-@login_manager.unauthorized_handler
-def unauthorized():
-    return page_forbidden(403)
 
 
 @app.route("/org")
@@ -166,15 +114,97 @@ def organization():
     # Check if the user is in an organization
     if current_user.member_of:
         org = current_user.member_of
-        return render_template(
-            "organizacion.html",
-            user=current_user,
-            org=org,
-            is_authenticated=current_user.is_authenticated,
-            is_representative=current_user.is_representative,
-        )
+        return render_template("organization.html", user=current_user, org=org,)
     else:
         return page_forbidden(403)
+
+
+@app.route("/miembros")
+@login_required
+def members():
+    # Check if the user is in an organization
+    if current_user.member_of:
+        org = current_user.member_of
+        return render_template("members.html", user=current_user, org=org)
+    else:
+        return page_forbidden(403)
+
+
+@app.route("/ajustes")
+@login_required
+def settings():
+    # If the user is in an organization and is an admin
+    if current_user.member_of and current_user.admin_of:
+        org = current_user.member_of
+        # If an user was not provided. Split even if it doesn't have a @.
+        if not (username_to_modify := request.args.get("usuario")).split("@")[0]:
+            return render_template("settings.html", user=current_user, org=org)
+        else:
+            # retrieve user from db, if failed return error
+            if not (
+                user_to_modify := Person.get_or_none(
+                    Person.username == username_to_modify
+                )
+            ):
+                return render_template(
+                    "settings.html",
+                    user=current_user,
+                    org=org,
+                    get_flashed_messages=(
+                        lambda: ["El usuario no está en la plataforma."]
+                    ),
+                )
+            if request.args.get("añadir"):
+                # if user is not already part of an org
+                if not user_to_modify.member_of:
+                    user_to_modify.member_of = org
+                    user_to_modify.save()
+                    print("user modified")
+                    return render_template("settings.html", user=current_user, org=org)
+                else:
+                    return render_template(
+                        "settings.html",
+                        user=current_user,
+                        org=org,
+                        get_flashed_messages=(
+                            lambda: ["El usuario ya pertenece a una organización."]
+                        ),
+                    )
+                return render_template("settings.html", user=current_user, org=org)
+            elif request.args.get("remover"):
+                if user_to_modify.member_of == org:
+                    user_to_modify.member_of = None
+                    user_to_modify.save()
+                    return render_template("settings.html", user=current_user, org=org)
+                else:
+                    return render_template(
+                        "settings.html",
+                        user=current_user,
+                        org=org,
+                        get_flashed_messages=(
+                            lambda: ["El usuario no está en tu organización."]
+                        ),
+                    )
+                return render_template("settings.html", user=current_user, org=org)
+            else:
+                return internal_server_error(500)
+    else:
+        return page_forbidden(403)
+
+
+# Authentication and registration with Google
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return page_forbidden(403)
+
+
+@app.route("/login")
+def login():
+    return redirect(
+        get_redirect_url(client=client, request=request, discovery=GOOGLE_DISCOVERY_URL)
+    )
 
 
 @app.route("/login/callback")

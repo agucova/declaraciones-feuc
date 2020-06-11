@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Miembros
+{% endblock %}
+
+{% block main %}
+<h1>Miembros</h1><br>
+<ul class="list-group">
+    {% for member in org.members %}
+    <li class="list-group-item">
+        {{member.name}}
+        {% if member.admin_of %}
+        <b>(admin)</b>
+        {% else %}
+        <b>(miembro)</b>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

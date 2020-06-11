@@ -45,7 +45,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/representantes">Representantes</a>
                     </li>
-                    {% if is_authenticated and is_representative %}
+                    {% if user.is_authenticated and user.is_representative %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -53,13 +53,16 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <a class="dropdown-item" href="#">Mis Declaraciones</a>
-                            <a class="dropdown-item" href="/upload">Subir Declaración</a>
+                            <a class="dropdown-item" href="/crear">Subir Declaración</a>
                             <a class="dropdown-item" href="/org">Mi Organización</a>
+                            {% if user.admin_of %}
+                            <a class="dropdown-item" href="/ajustes">Ajustes</a>
+                            {% endif %}
                         </div>
                     </li>
                     {% endif %}
                 </ul>
-                {% if is_authenticated %}
+                {% if user.is_authenticated %}
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Cerrar Sesión</a>
