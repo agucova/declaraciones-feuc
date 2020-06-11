@@ -14,9 +14,10 @@ import os
 import requests
 import json
 
-from declaraciones_feuc.model import db, Person, Statement
+from declaraciones_feuc.model import db, Person, Statement, Organization
+from declaraciones_feuc.auth import get_user_info, get_redirect_url
 
-
+# Initialize app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 
@@ -44,7 +45,9 @@ def load_person(id):
 @app.before_request
 def before_request():
     db.connect()
-    db.create_tables([Person, Statement])  # TODO: #3 Remove create_tables on request
+    db.create_tables(
+        [Person, Statement, Organization]
+    )  # TODO: #3 Remove create_tables on request
     if not current_user.is_authenticated:
         current_user.is_representative = False
 
@@ -127,18 +130,25 @@ def representantes():
     )
 
 
-@app.route("/admin")
+@app.route("/upload")
 @login_required
-def admin():
+def upload():
     if current_user.is_representative:
         return render_template(
-            "admin.html",
+            "upload.html",
             is_authenticated=current_user.is_authenticated,
             is_representative=current_user.is_representative,
             use=["upload"],
         )
     else:
         return page_forbidden(403)
+
+
+@app.route("/login")  # TODO: #7 Refactor all authentication logic to a separate file
+def login():
+    return redirect(
+        get_redirect_url(client=client, request=request, discovery=GOOGLE_DISCOVERY_URL)
+    )
 
 
 # Here comes the auth
@@ -150,88 +160,96 @@ def unauthorized():
     return page_forbidden(403)
 
 
-@app.route("/login")
-def login():
-    # Find out what URL to hit for Google login
-    google_provider_cfg = get_google_provider_cfg()
-    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
-
-    # Use library to construct the request for Google login and provide
-    # scopes that let you retrieve user's profile from Google
-    request_uri = client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=request.base_url + "/callback",
-        scope=["openid", "email", "profile"],
-    )
-    return redirect(request_uri)
+@app.route("/org")
+@login_required
+def organization():
+    # Check if the user is in an organization
+    if current_user.member_of:
+        org = current_user.member_of
+        return render_template(
+            "organizacion.html",
+            user=current_user,
+            org=org,
+            is_authenticated=current_user.is_authenticated,
+            is_representative=current_user.is_representative,
+        )
+    else:
+        return page_forbidden(403)
 
 
 @app.route("/login/callback")
 def callback():
-    # Get authorization code Google sent back to you
-    code = request.args.get("code")
-
-    # Find out what URL to hit to get tokens that allow you to ask for
-    # things on behalf of a user
-    google_provider_cfg = get_google_provider_cfg()
-    token_endpoint = google_provider_cfg["token_endpoint"]
-
-    # Prepare and send request to get tokens! Yay tokens!
-    token_url, headers, body = client.prepare_token_request(
-        token_endpoint,
-        authorization_response=request.url,
-        redirect_url=request.base_url,
-        code=code,
-    )
-    token_response = requests.post(
-        token_url,
-        headers=headers,
-        data=body,
-        auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
+    userinfo = get_user_info(
+        client=client,
+        request=request,
+        client_id=GOOGLE_CLIENT_ID,
+        secret=GOOGLE_CLIENT_SECRET,
+        discovery=GOOGLE_DISCOVERY_URL,
     )
 
-    # Parse the tokens!
-    client.parse_request_body_response(json.dumps(token_response.json()))
-
-    # Now that we have tokens (yay) let's find and hit URL
-    # from Google that gives you user's profile information,
-    # including their Google Profile Image and Email
-    userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
-    uri, headers, body = client.add_token(userinfo_endpoint)
-    userinfo_response = requests.get(uri, headers=headers, data=body)
-
-    # We want to make sure their email is verified.
-    # The user authenticated with Google, authorized our
-    # app, and now we've verified their email through Google!
-    if userinfo_response.json().get("email_verified"):
-        print(userinfo_response.json())
-        google_id = userinfo_response.json()["sub"]
-        email = userinfo_response.json()["email"]
-        first_name = (userinfo_response.json()["given_name"],)
-        last_name = userinfo_response.json()["family_name"]
-        name = userinfo_response.json()["name"]
+    # Check if the email is verified
+    if userinfo.get("email_verified"):
+        google_id = userinfo["sub"]
+        email = userinfo["email"]
+        first_name = (userinfo["given_name"],)
+        last_name = userinfo["family_name"]
+        name = userinfo["name"]
     else:
-        return "User email not available or not verified by Google.", 400
+        return "Email no disponible o no verificado. ", 400
 
     # Doesn't exist? Add to database
     if not Person.select().where(Person.google_id == google_id).exists():
-        if email == "agucova@uc.cl":  # Give me admin access
-            is_representative = True
-        else:
-            is_representative = False
-        Person.create(
-            google_id=google_id,
-            username=email.split("@")[0],
-            email=email,
-            name=name,
-            first_name=first_name,
-            last_name=last_name,
-            is_representative=is_representative,
-            is_active=True,
-            is_authenticated=True,
-        )
+        username = email.split("@")[0]  # Extracts user from the first part of the email
+        domain = email.split("@")[1]
 
-    user = Person.get(Person.google_id == google_id)
+        allowed_domains = [
+            "uc.cl",
+            "puc.cl",
+            "mat.uc.cl",
+            "ing.uc.cl",
+            "ing.puc.cl",
+            "mat.puc.cl",
+        ]
+        if not any(
+            [domain == allowed_domain for allowed_domain in allowed_domains]
+        ):  # Check if user is part of the university
+            return page_forbidden(403)
+
+        if email == "agucova@uc.cl":  # Give me admin access (for testing)
+            cai = Organization.create(  # Add me in the CAi
+                name="Centro de Alumnos de Ingeniería",
+                acronym="CAi",
+                type_of_org="Centro de Estudiantes",
+            )
+
+            Person.create(
+                google_id=google_id,
+                username=username,
+                email=email,
+                name=name,
+                first_name=first_name,
+                last_name=last_name,
+                is_representative=True,
+                is_active=True,
+                is_authenticated=True,
+                member_of=cai,
+                admin_of=cai,
+            )
+
+        else:
+            Person.create(
+                google_id=google_id,
+                username=username,
+                email=email,
+                name=name,
+                first_name=first_name,
+                last_name=last_name,
+                is_representative=False,
+                is_active=True,
+                is_authenticated=True,
+            )
+
+    user = Person.get(Person.google_id == google_id)  # Fetch user
 
     # Begin user session by logging the user in
     login_user(user)
@@ -245,10 +263,6 @@ def callback():
 def logout():
     logout_user()
     return redirect(url_for("home"))
-
-
-def get_google_provider_cfg():
-    return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 
 if __name__ == "__main__":

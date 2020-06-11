@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Mi Organización
+{% endblock %}
+
+{% block main %}
+<h1>Mi Organización</h1><br>
+<ul class="list-group">
+    <li class="list-group-item d-flex justify-content-between align-items-center list-group-item-action disabled tabindex="
+        -1" aria-disabled="true"">
+        Organización
+        <span>{{org.name }}</span></li>
+    <li class=" list-group-item d-flex justify-content-between align-items-center list-group-item-action disabled"
+        tabindex="-1" aria-disabled="true">
+        Acrónimo
+        <span>{{ org.acronym }}</span></li>
+    <a href="members" class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
+        Miembros
+        <span class="badge badge-primary badge-pill">{{ org.members|length }}</span>
+    </a>
+    <a href="/admins" class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
+        Administradores
+        <span class="badge badge-primary badge-pill ">{{ org.admins|length }}</span>
+    </a>
+</ul>
+{% endblock %}

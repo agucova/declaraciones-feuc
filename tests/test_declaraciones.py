@@ -12,7 +12,7 @@ def client():
         yield client
 
 
-def test_http(client):
+def test_http(client):  # TODO: #8 Añadir tests reales
     """Tests whether there is a 200 http response on root"""
 
     response = client.get("/")

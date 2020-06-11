@@ -8,12 +8,32 @@ from peewee import (
     DateField,
     ForeignKeyField,
     SqliteDatabase,
+    DateTimeField,
 )
 
 # TODO: #1 Migrate to PostgreSQL or MariaDB
 db = SqliteDatabase("statements.sqlite")
 
 # Model
+class Organization(Model):
+    name = CharField(
+        max_length=120,
+        null=False,
+        help_text="Nombre de la organización. Ej: Centro de Alumnos de Ingeniería",
+    )
+    acronym = CharField(
+        max_length=12, null=False, help_text="Acrónimo de la organización. Ej: CAi"
+    )
+    type_of_org = CharField(
+        max_length=80,
+        null=False,
+        help_text="Tipo de organización. Ej: Centro de Alumnos",
+    )
+
+    class Meta:
+        database = db
+
+
 class Person(Model):
     google_id = CharField(null=False, max_length=400)
     first_name = CharField(null=False)
@@ -22,8 +42,7 @@ class Person(Model):
     username = CharField(null=False)
     email = CharField(null=False)
     is_representative = BooleanField(
-        null=False,
-        help_text="Booleano representando si es un representante en el consejo o no.",
+        null=False, help_text="Si es un representante en el consejo o no.",
     )
     type_of_representative = CharField(
         null=True,
@@ -45,6 +64,18 @@ class Person(Model):
     )
     is_active = BooleanField(null=False)
     is_authenticated = BooleanField(null=False)
+    member_of = ForeignKeyField(
+        Organization,
+        backref="members",
+        help_text="A qué organización pertenece/representa.",
+        null=True,
+    )
+    admin_of = ForeignKeyField(
+        Organization,
+        backref="admins",
+        help_text="Administrador de la organizacion.",
+        null=True,
+    )
 
     class Meta:
         database = db
@@ -65,6 +96,13 @@ class Statement(Model):
         backref="statements",
         help_text="Foreign key de quién agregó la declaración.",
     )
+    organization_affiliated = ForeignKeyField(
+        Organization,
+        backref="statements",
+        help_text="Organizaciones afiliadas a la declaración.",
+    )
+
+    last_updated = DateTimeField(null=False)
 
     class Meta:
         database = db
