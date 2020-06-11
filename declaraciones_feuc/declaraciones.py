@@ -214,7 +214,7 @@ def callback():
 
     # Doesn't exist? Add to database
     if not Person.select().where(Person.google_id == google_id).exists():
-        if email == "agucova@uc.cl": # Give me admin access
+        if email == "agucova@uc.cl":  # Give me admin access
             is_representative = True
         else:
             is_representative = False
