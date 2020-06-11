@@ -76,9 +76,6 @@
         </div>
     </header>
     {% endif %}
-    {% if "upload" in use %}
-    <script src="static/upload.js"></script>
-    {% endif %}
     <main class="container p-5">
         {% block main %}{% endblock %}
     </main>
@@ -87,6 +84,9 @@
         Plataforma abierta para declaraciones de la FEUC. Hecho por Agustín Covarrubias y licenciado bajo la Licencia
         MIT.
     </footer>
+    {% if "upload" in use %}
+    <script src="static/upload.js"></script>
+    {% endif %}
 </body>
 
 </html>
