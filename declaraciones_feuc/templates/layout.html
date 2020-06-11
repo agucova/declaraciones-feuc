@@ -76,9 +76,8 @@
         </div>
     </header>
     {% endif %}
-    {% if "uppy" in use %}
-    {{ webpack['app.js'] }}
-    <script src="https://transloadit.edgly.net/releases/uppy/v1.15.0/uppy.min.js"></script>
+    {% if "upload" in use %}
+    <script src="static/upload.js"></script>
     {% endif %}
     <main class="container p-5">
         {% block main %}{% endblock %}

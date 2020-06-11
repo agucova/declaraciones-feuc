@@ -135,7 +135,7 @@ def admin():
             "admin.html",
             is_authenticated=current_user.is_authenticated,
             is_representative=current_user.is_representative,
-            use=["uppy"],
+            use=["upload"],
         )
     else:
         return page_forbidden(403)

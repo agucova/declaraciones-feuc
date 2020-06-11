@@ -20,14 +20,20 @@ const uppy = Uppy({
 })
 
 uppy.use(Dashboard, {
-    // Options
+    inline: true,
+    target: '#uploader',
+    showProgressDetails: true,
+    note: 'Solo PDFs de hasta 20 mb.'
 })
 uppy.use(FileInput, {
-    // Options
+    target: Dashboard,
+    companionUrl: '/'
 })
 uppy.use(GoogleDrive, {
-    // Options
+    target: Dashboard,
+    companionUrl: '/'
 })
 uppy.use(Url, {
-    // Options
+    target: Dashboard,
+    companionUrl: '/'
 })
