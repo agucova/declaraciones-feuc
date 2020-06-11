@@ -11,8 +11,29 @@ def client():
         yield client
 
 
-def test_http(client):  # TODO: #8 Añadir tests reales
-    """Tests whether there is a 200 http response on root"""
+def test_http(client):
+    """Tests whether there is a 403 http response on root"""
 
     response = client.get("/")
     assert response.status_code == 200
+
+
+def test_settings_forbidden(client):
+    """Tests whether there is a 403 http response on settings"""
+
+    response = client.get("/ajustes")
+    assert response.status_code == 403
+
+
+def test_members_forbidden(client):
+    """Tests whether there is a 403 http response on members"""
+
+    response = client.get("/miembros")
+    assert response.status_code == 403
+
+
+def test_org_forbidden(client):
+    """Tests whether there is a 403 http response on org"""
+
+    response = client.get("/org")
+    assert response.status_code == 403
