@@ -23,11 +23,9 @@ uppy.use(Dashboard, {
     inline: true,
     target: '#uploader',
     showProgressDetails: true,
+    width: "100%",
+    height: "350px",
     note: 'Solo PDFs de hasta 20 mb.'
-})
-uppy.use(FileInput, {
-    target: Dashboard,
-    companionUrl: '/'
 })
 uppy.use(GoogleDrive, {
     target: Dashboard,
