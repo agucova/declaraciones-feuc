@@ -12,7 +12,7 @@ from flask_login import (
     logout_user,
 )
 
-superusers = ["agucova@uc.cl"]
+superusers = ["agucova@uc.cl", "mihenriquez@uc.cl", "ashasbun@uc.cl"]
 
 # Initialize app
 app = Flask(__name__)
@@ -140,10 +140,12 @@ def settings():
     # If the user is in an organization and is an admin
     if current_user.member_of and current_user.admin_of:
         org = current_user.member_of
-        # If an user was not provided. Split even if it doesn't have a @.
-        if not (username_to_modify := request.args.get("usuario")).split("@")[0]:
+        # If an user was not provided.
+        if not (username_to_modify := request.args.get("usuario")):
             return render_template("settings.html", user=current_user, org=org)
         else:
+            # split in case it also inputted the email
+            username_to_modify = username_to_modify.split("@")[0]
             # retrieve user from db, if failed return error
             if not (
                 user_to_modify := Person.get_or_none(
