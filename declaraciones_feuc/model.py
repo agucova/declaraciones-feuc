@@ -4,15 +4,16 @@ from peewee import (
     CharField,
     BooleanField,
     IntegerField,
-    BigIntegerField,
     DateField,
     ForeignKeyField,
     SqliteDatabase,
     DateTimeField,
 )
 
+
 # TODO: #1 Migrate to PostgreSQL or MariaDB
 db = SqliteDatabase("statements.sqlite")
+
 
 # Model
 class Organization(Model):

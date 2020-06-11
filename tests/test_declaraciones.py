@@ -1,5 +1,4 @@
 from declaraciones_feuc.declaraciones import app
-from declaraciones_feuc.model import db, Person, Statement
 
 import pytest
 
