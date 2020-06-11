@@ -5,7 +5,7 @@ import subprocess
 def when_ready(server):
     open("/tmp/app-initialized", "w").close()
     subprocess.run(["mkdir", "companion/"])
-    subprocess.run(["$(npm bin)/companion"], shell=True)
+    subprocess.Popen(["$(npm bin)/companion"], shell=True)
 
 
 bind = "unix:///tmp/nginx.socket"

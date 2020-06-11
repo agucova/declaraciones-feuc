@@ -145,5 +145,7 @@ cython_debug/
 *.pem
 
 *.sqlite
+
 node_modules
-node_modules
+
+companion/
