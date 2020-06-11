@@ -4,7 +4,7 @@ import subprocess
 # Starts Uppy's Companion
 def when_ready(server):
     open("/tmp/app-initialized", "w").close()
-    subprocess.run(["mkdir", "companion/"], shell=True)
+    subprocess.run(["mkdir", "companion/"])
     subprocess.run(["$(npm bin)/companion"], shell=True)
 
 
