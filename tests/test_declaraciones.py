@@ -18,6 +18,20 @@ def test_http(client):
     assert response.status_code == 200
 
 
+def test_http_statements(client):
+    """Tests whether there is a 200 http response on statements"""
+
+    response = client.get("/declaraciones")
+    assert response.status_code == 200
+
+
+def test_http_representatives(client):
+    """Tests whether there is a 200 http response on representatives"""
+
+    response = client.get("/representantes")
+    assert response.status_code == 200
+
+
 def test_settings_forbidden(client):
     """Tests whether there is a 403 http response on settings"""
 
