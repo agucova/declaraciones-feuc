@@ -1,1 +1,1 @@
-web: gunicorn declaraciones_feuc.declaraciones:app
+web: $(npm bin)/companion & gunicorn declaraciones_feuc.declaraciones:app & wait -n

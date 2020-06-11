@@ -1,0 +1,33 @@
+{
+  "name": "declaraciones-feuc",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "@uppy/companion": "^2.0.0-alpha.3",
+    "@uppy/core": "^1.10.5",
+    "@uppy/dashboard": "^1.9.0",
+    "@uppy/file-input": "^1.4.12",
+    "@uppy/google-drive": "^1.5.6",
+    "@uppy/locales": "^1.14.0",
+    "@uppy/url": "^1.5.6",
+    "webpack": "^4.43.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agucova/declaraciones-feuc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/agucova/declaraciones-feuc/issues"
+  },
+  "homepage": "https://github.com/agucova/declaraciones-feuc#readme"
+}

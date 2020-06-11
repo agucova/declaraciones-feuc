@@ -21,11 +21,11 @@ class Person(Model):
     name = CharField(null=False)
     username = CharField(null=False)
     email = CharField(null=False)
-    isRepresentative = BooleanField(
+    is_representative = BooleanField(
         null=False,
         help_text="Booleano representando si es un representante en el consejo o no.",
     )
-    typeOfRepresentative = CharField(
+    type_of_representative = CharField(
         null=True,
         max_length=120,
         help_text="Tipo de representante. Ej. Consejero Territorial",

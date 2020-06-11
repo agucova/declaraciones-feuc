@@ -16,7 +16,8 @@ import json
 
 from declaraciones_feuc.model import db, Person, Statement
 
-app = Flask(__name__, instance_relative_config=True)
+
+app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 
 # User session management setup
@@ -44,6 +45,8 @@ def load_person(id):
 def before_request():
     db.connect()
     db.create_tables([Person, Statement])  # Performance hog, please remove
+    if not current_user.is_authenticated:
+        current_user.is_representative = False
 
 
 @app.after_request
@@ -64,7 +67,11 @@ def after_request(response):
 @app.errorhandler(404)
 def page_not_found(e):
     return (
-        render_template("404.html", is_authenticated=current_user.is_authenticated),
+        render_template(
+            "404.html",
+            is_authenticated=current_user.is_authenticated,
+            is_representative=current_user.is_representative,
+        ),
         404,
     )
 
@@ -72,7 +79,11 @@ def page_not_found(e):
 @app.errorhandler(403)
 def page_forbidden(e):
     return (
-        render_template("403.html", is_authenticated=current_user.is_authenticated),
+        render_template(
+            "403.html",
+            is_authenticated=current_user.is_authenticated,
+            is_representative=current_user.is_representative,
+        ),
         403,
     )
 
@@ -80,34 +91,54 @@ def page_forbidden(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return (
-        render_template("500.html", is_authenticated=current_user.is_authenticated),
+        render_template(
+            "500.html",
+            is_authenticated=current_user.is_authenticated,
+            is_representative=current_user.is_representative,
+        ),
         500,
     )
 
 
 @app.route("/")
 def home():
-    return render_template("home.html", is_authenticated=current_user.is_authenticated)
+    return render_template(
+        "home.html",
+        is_authenticated=current_user.is_authenticated,
+        is_representative=current_user.is_representative,
+    )
 
 
 @app.route("/declaraciones")
 def declaraciones():
     return render_template(
-        "declaraciones.html", is_authenticated=current_user.is_authenticated
+        "declaraciones.html",
+        is_authenticated=current_user.is_authenticated,
+        is_representative=current_user.is_representative,
     )
 
 
 @app.route("/representantes")
 def representantes():
     return render_template(
-        "representantes.html", is_authenticated=current_user.is_authenticated
+        "representantes.html",
+        is_authenticated=current_user.is_authenticated,
+        is_representative=current_user.is_representative,
     )
 
 
 @app.route("/admin")
 @login_required
 def admin():
-    return render_template("admin.html", is_authenticated=current_user.is_authenticated)
+    if current_user.is_representative:
+        return render_template(
+            "admin.html",
+            is_authenticated=current_user.is_authenticated,
+            is_representative=current_user.is_representative,
+            use=["uppy"],
+        )
+    else:
+        return page_forbidden(403)
 
 
 # Here comes the auth
@@ -190,7 +221,7 @@ def callback():
             name=name,
             first_name=first_name,
             last_name=last_name,
-            isRepresentative=False,
+            is_representative=False,
             is_active=True,
             is_authenticated=True,
         )

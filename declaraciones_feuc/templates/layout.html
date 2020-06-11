@@ -9,7 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
-
+    {% if "uppy" in use %}
+    <link href="https://transloadit.edgly.net/releases/uppy/v1.15.0/uppy.min.css" rel="stylesheet">
+    {% endif%}
     <link href="/static/styles.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -42,7 +44,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/representantes">Representantes</a>
                 </li>
-                {% if is_authenticated %}
+                {% if is_authenticated and is_representative %}
                 <li class="nav-item">
                     <a class="nav-link" href="/admin">Admin</a>
                 </li>
@@ -74,7 +76,10 @@
         </div>
     </header>
     {% endif %}
-
+    {% if "uppy" in use %}
+    {{ webpack['app.js'] }}
+    <script src="https://transloadit.edgly.net/releases/uppy/v1.15.0/uppy.min.js"></script>
+    {% endif %}
     <main class="container p-5">
         {% block main %}{% endblock %}
     </main>
@@ -83,7 +88,6 @@
         Plataforma abierta para declaraciones de la FEUC. Hecho por Agustín Covarrubias y licenciado bajo la Licencia
         MIT.
     </footer>
-
 </body>
 
 </html>
