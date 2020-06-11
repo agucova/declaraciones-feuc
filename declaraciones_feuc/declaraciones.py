@@ -44,7 +44,7 @@ def load_person(id):
 @app.before_request
 def before_request():
     db.connect()
-    db.create_tables([Person, Statement])  # Performance hog, please remove
+    db.create_tables([Person, Statement])  # TODO: #3 Remove create_tables on request
     if not current_user.is_authenticated:
         current_user.is_representative = False
 
@@ -142,6 +142,7 @@ def admin():
 
 
 # Here comes the auth
+# TODO: #4 Fix unstable auth session
 
 
 @login_manager.unauthorized_handler

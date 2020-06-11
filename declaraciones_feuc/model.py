@@ -10,7 +10,7 @@ from peewee import (
     SqliteDatabase,
 )
 
-
+# TODO: #1 Migrate to PostgreSQL or MariaDB
 db = SqliteDatabase("statements.sqlite")
 
 # Model
@@ -50,6 +50,7 @@ class Person(Model):
         database = db
 
 
+# TODO: #2 Implementar conexión a S3 o blobs
 class Statement(Model):
     title = CharField(
         max_length=400,
