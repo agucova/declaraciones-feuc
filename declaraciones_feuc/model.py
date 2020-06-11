@@ -65,6 +65,7 @@ class Person(Model):
     )
     is_active = BooleanField(null=False)
     is_authenticated = BooleanField(null=False)
+    is_superuser = BooleanField(null=True)
     member_of = ForeignKeyField(
         Organization,
         backref="members",
@@ -97,10 +98,10 @@ class Statement(Model):
         backref="statements",
         help_text="Foreign key de quién agregó la declaración.",
     )
-    organization_affiliated = ForeignKeyField(
+    organization_affiliated = ForeignKeyField(  # TODO: #9 Implement Many to Many
         Organization,
         backref="statements",
-        help_text="Organizaciones afiliadas a la declaración.",
+        help_text="Organizacion afiliada a la declaración.",
     )
 
     last_updated = DateTimeField(null=False)

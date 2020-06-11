@@ -1,12 +1,9 @@
 import os
-
-
 from declaraciones_feuc.model import db, Person, Statement, Organization
 from declaraciones_feuc.auth import get_user_info, get_redirect_url
 from oauthlib.oauth2 import WebApplicationClient
 from flask import Flask
 from flask import render_template, redirect, request, url_for
-
 from flask_login import (
     LoginManager,
     current_user,
@@ -14,6 +11,8 @@ from flask_login import (
     login_user,
     logout_user,
 )
+
+superusers = ["agucova@uc.cl"]
 
 # Initialize app
 app = Flask(__name__)
@@ -50,7 +49,7 @@ def before_request():
         current_user.is_representative = False
 
 
-# disable cache and close db
+# Disable cache and close db
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -58,6 +57,9 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     db.close()
     return response
+
+
+# Error pages
 
 
 @app.errorhandler(404)
@@ -82,6 +84,9 @@ def internal_server_error(e):
         render_template("500.html", user=current_user,),
         500,
     )
+
+
+# Routes
 
 
 @app.route("/")
@@ -122,7 +127,6 @@ def organization():
 @app.route("/miembros")
 @login_required
 def members():
-    # Check if the user is in an organization
     if current_user.member_of:
         org = current_user.member_of
         return render_template("members.html", user=current_user, org=org)
@@ -245,7 +249,7 @@ def callback():
         ):  # Check if user is part of the university
             return page_forbidden(403)
 
-        if email == "agucova@uc.cl":  # Give me admin access (for testing)
+        if email in superusers:  # Give superuser access
             cai = Organization.create(  # Add me in the CAi
                 name="Centro de Alumnos de Ingeniería",
                 acronym="CAi",
@@ -264,6 +268,7 @@ def callback():
                 is_authenticated=True,
                 member_of=cai,
                 admin_of=cai,
+                is_superuser=True,
             )
 
         else:
