@@ -31,6 +31,9 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 # OAuth2 Client
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
+db.create_tables(
+    [Person, Statement, Organization]
+)  # TODO: #3 Remove create_tables on request
 
 # Flask-Login helper to retrieve a user from our db
 @login_manager.user_loader
@@ -42,9 +45,6 @@ def load_person(id):
 @app.before_request
 def before_request():
     db.connect()
-    db.create_tables(
-        [Person, Statement, Organization]
-    )  # TODO: #3 Remove create_tables on request
     if not current_user.is_authenticated:
         current_user.is_representative = False
 
@@ -57,8 +57,6 @@ def after_request(response):
 
 
 # Error pages
-
-
 @app.errorhandler(404)
 def page_not_found(e):
     return (
