@@ -38,7 +38,7 @@ db.create_tables(
 # Flask-Login helper to retrieve a user from our db
 @login_manager.user_loader
 def load_person(id):
-    return Person.get(id)
+    return Person.get_or_none(id)
 
 
 # DB connection per request
