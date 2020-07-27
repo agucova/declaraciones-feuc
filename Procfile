@@ -1,1 +1,1 @@
-web: bin/start-nginx gunicorn -c config/gunicorn.conf.py declaraciones_feuc.declaraciones:app
+web: bin/start-nginx-debug gunicorn -c config/gunicorn.conf.py declaraciones_feuc.app:app

@@ -5,7 +5,7 @@ description = ""
 authors = ["Agustín Covarrubias <agucova@uc.cl>"]
 
 [tool.poetry.dependencies]
-python = "3.8.3"
+python = "^3.8.2"
 python-dotenv = "^0.13.0"
 peewee = "^3.13.3"
 oauthlib = "^3.1.0"

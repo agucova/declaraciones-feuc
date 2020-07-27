@@ -29,9 +29,9 @@ uppy.use(Dashboard, {
 })
 uppy.use(GoogleDrive, {
     target: Dashboard,
-    companionUrl: '/' // TODO: #6 Set a companion URL
+    companionUrl: '/uppy' // TODO: #6 Set a companion URL
 })
 uppy.use(Url, {
     target: Dashboard,
-    companionUrl: '/'
+    companionUrl: '/uppy'
 })
