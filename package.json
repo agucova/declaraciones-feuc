@@ -14,7 +14,7 @@
     "@uppy/google-drive": "^1.5.6",
     "@uppy/locales": "^1.14.0",
     "@uppy/url": "^1.5.6",
-    "webpack": "^4.43.0"
+    "webpack": "^5.75.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
